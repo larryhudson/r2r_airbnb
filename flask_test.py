@@ -1,5 +1,6 @@
-from flask import Flask, jsonify, render_template, request, redirect
+from flask import Flask, render_template, request
 import search_functions as SF
+import foursquare as FSQ
 from os import environ
 app = Flask(__name__)
 
@@ -33,6 +34,18 @@ def results():
     first_lng = listings[0]['lng']
 
     return render_template('result.html', listings=listings, first_lat=first_lat, first_lng=first_lng, maps_api_key=maps_api_key)
+
+@app.route('/foursquare/<airbnb_id>')
+def foursquare(airbnb_id):
+    airbnb_listing_response = SF.get_airbnb_listing_response(airbnb_id)
+    airbnb_lat_lng = SF.get_airbnb_lat_lng(airbnb_listing_response)
+    airbnb_lat, airbnb_lng = airbnb_lat_lng
+
+    response = FSQ.venue_explore_response(airbnb_lat_lng)
+    places = FSQ.get_recommended_places(response)
+
+    return render_template('foursquare.html', airbnb_lat=airbnb_lat, airbnb_lng=airbnb_lng, places=places)
+
 
 @app.route('/map')
 def map():

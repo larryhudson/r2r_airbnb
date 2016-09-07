@@ -34,16 +34,18 @@
           zoom: 12
         });
 
+        var bounds = new google.maps.LatLngBounds();
+
         {% for listing in listings %}
         var lat = {{ listing['lat'] }};
         var lng = {{ listing['lng'] }};
         var location = new google.maps.LatLng(lat, lng);
         var bnbTitle = "{{ listing['title'] }}";
         var price = {{ listing['price'] }};
-        var star_rating = {{ listing['star_rating']}};
-        var num_reviews = {{ listing['reviews_count']}};
+        var star_rating = {{ listing['star_rating'] }};
+        var num_reviews = {{ listing['reviews_count'] }};
 
-        var contentString = '<b>' + bnbTitle + '</b>' +
+        var contentString = '<b><a href="http://127.0.0.1:5000/foursquare/{{ listing['id']}}">' + bnbTitle + '</a></b>' +
             '<p><b>$' + price + '</b> per night</p>' +
             '<p>Average rating ' + star_rating + ' from ' + num_reviews + ' reviews</p>';
 
@@ -57,10 +59,15 @@
           map: map,
           title: bnbTitle,
         });
+
+        bounds.extend(bnb{{ listing['id'] }}.position);
+
         bnb{{ listing['id'] }}.addListener('click', function() {
           infowindow{{ listing['id'] }}.open(map, bnb{{ listing['id'] }});
         });
         {% endfor %}
+
+        map.fitBounds(bounds);
       }
     {% endblock %}
     </script>
