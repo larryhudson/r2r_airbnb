@@ -1,0 +1,70 @@
+<!doctype html>
+<head>
+{% block head %}
+<title>Simple Map</title>
+<meta name="viewport" content="initial-scale=1.0">
+<meta charset="utf-8">
+<style>
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  #map {
+    height: 100%;
+  }
+</style>
+{% endblock %}
+</head>
+  <body>
+  {% block body %}
+  {% for listing in listings %}
+     <p>{{ listing['title'] }} - {{ listing['price'] }} per night - average rating {{ listing['star_rating']}} from {{ listing['reviews_count'] }} reviews</p>
+   {% endfor %}
+    <div id="map"></div>
+    <script type="text/javascript"
+  src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <script>
+    {% block map %}
+      var map;
+      function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: {{ first_lat }},
+                   lng: {{ first_lng }} },
+          zoom: 12
+        });
+
+        {% for listing in listings %}
+        var lat = {{ listing['lat'] }};
+        var lng = {{ listing['lng'] }};
+        var location = new google.maps.LatLng(lat, lng);
+        var bnbTitle = "{{ listing['title'] }}";
+        var price = {{ listing['price'] }};
+        var star_rating = {{ listing['star_rating']}};
+        var num_reviews = {{ listing['reviews_count']}};
+
+        var contentString = '<b>' + bnbTitle + '</b>' +
+            '<p><b>$' + price + '</b> per night</p>' +
+            '<p>Average rating ' + star_rating + ' from ' + num_reviews + ' reviews</p>';
+
+        var infowindow{{ listing['id'] }} = new google.maps.InfoWindow({
+              content: contentString
+            });
+
+
+        var bnb{{ listing['id'] }} = new google.maps.Marker({
+          position: location,
+          map: map,
+          title: bnbTitle,
+        });
+        bnb{{ listing['id'] }}.addListener('click', function() {
+          infowindow{{ listing['id'] }}.open(map, bnb{{ listing['id'] }});
+        });
+        {% endfor %}
+      }
+    {% endblock %}
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ maps_api_key }}&callback=initMap"
+    async defer></script>
+    {% endblock %}
+</body>

@@ -1,0 +1,8 @@
+<p>Average price per night in {{ city }} is: {{ average_price }} </p>
+
+<form action="/result" method="post">
+  City: <input type="text" name="city" value="{{ city }}"></input>
+  Min price: <input type="text" name="price_min" value="0"></input>
+  Max price: <input type="text" name="price_max" value="{{ average_price }}"></input>
+  <input type="submit" value="Submit"></input>
+</form>
