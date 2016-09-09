@@ -2,88 +2,122 @@
 <head>
 {% block head %}
 <title>Foursquare places</title>
-<meta name="viewport" content="initial-scale=1.0">
 <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-<script type="text/javascript"
-src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<link href="{{ url_for('static', filename='bootstrap.css') }}" rel="stylesheet">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
 <script src="http://maps.googleapis.com/maps/api/js?key={{ maps_api_key }}&callback=initMap"
 async defer></script>
 
 
 <script>
 {% block map %}
-  var map;
-  function initMap() {
-    map = new google.maps.Map(document.getElementById('map'), {
-      center: {lat: {{ airbnb_lat }},
-               lng: {{ airbnb_lng }} },
-      zoom: 12
-    });
-    var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    var labelIndex = 0;
-    var bounds = new google.maps.LatLngBounds();
+      var map;
+      var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      var labelIndex = 0;
 
-    {% for place in places %}
-    var lat = {{ place['venue']['location']['lat'] }};
-    var lng = {{ place['venue']['location']['lng'] }};
-    var location = new google.maps.LatLng(lat, lng);
-    var placeTitle = "{{ place['venue']['name'] }}";
-    var rating = {{ place['venue']['rating']}};
-    var num_reviews = {{ place['venue']['ratingSignals']}};
-
-    var contentString = '<b>' + placeTitle + '</b>' +
-        '<p>Average rating ' + rating + ' from ' + num_reviews + ' reviews</p>';
-
-    var infowindow{{ place['venue']['id'] }} = new google.maps.InfoWindow({
-          content: contentString
+      function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: {{ airbnb_lat }},
+                   lng: {{ airbnb_lng }} },
+          zoom: 12
         });
+        var bounds = new google.maps.LatLngBounds();
 
-    var markerColour = '{{ colours_dict[place['broad_cat']] }}';
+        {% for place in places %}
+        var lat = {{ place['venue']['location']['lat'] }};
+        var lng = {{ place['venue']['location']['lng'] }};
+        var location = new google.maps.LatLng(lat, lng);
+        var placeTitle = "{{ place['venue']['name'] }}";
+        var rating = {{ place['venue']['rating']}};
+        var num_reviews = {{ place['venue']['ratingSignals']}};
+        var markerColour = '{{ colours_dict[place['broad_cat']] }}';
+        var iconURL = 'https://raw.githubusercontent.com/Concept211/Google-Maps-Markers/master/images/marker_' + markerColour + labels[labelIndex++ % labels.length] + '.png';
 
-    var place{{ place['venue']['id'] }} = new google.maps.Marker({
-      position: location,
-      map: map,
-      title: placeTitle,
-      icon: 'https://raw.githubusercontent.com/Concept211/Google-Maps-Markers/master/images/marker_' + markerColour + labels[labelIndex++] + '.png'
-    });
-    place{{ place['venue']['id'] }}.addListener('click', function() {
-      infowindow{{ place['venue']['id'] }}.open(map, place{{ place['venue']['id'] }});
-    });
+        var contentString = '<b>' + placeTitle + '</b>' +
+            '<p>Average rating ' + rating + ' from ' + num_reviews + ' reviews</p>';
 
-    bounds.extend(place{{ place['venue']['id'] }}.position);
+        var infowindow{{ place['venue']['id'] }} = new google.maps.InfoWindow({
+              content: contentString
+            });
 
-    {% endfor %}
+        var markerColour = '{{ colours_dict[place['broad_cat']] }}';
 
-    map.fitBounds(bounds);
-  }
+        var place{{ place['venue']['id'] }} = new google.maps.Marker({
+          position: location,
+          map: map,
+          title: placeTitle,
+          icon: iconURL
+        });
+        place{{ place['venue']['id'] }}.addListener('click', function() {
+          infowindow{{ place['venue']['id'] }}.open(map, place{{ place['venue']['id'] }});
+        });
+        var sidebarIMG = document.getElementById("image-place{{ place['venue']['id'] }}");
+
+        sidebarIMG.src = iconURL;
+        bounds.extend(place{{ place['venue']['id'] }}.position);
+
+        {% endfor %}
+
+        map.fitBounds(bounds);
+      }
 {% endblock %}
 </script>
 <style>
-  html, body {
+html, body, .container-fluid, .row {
+	height: 100%;
+}
+
+.sidebar {
+  background-color: #CCCCCC;
+  overflow-y: auto;
+}
+
+#map {
     height: 100%;
-    margin: 0;
-    padding: 0;
+}
+
+@media (min-width: 992px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: block;
+    background-color: #CCCCCC;
   }
-  #map {
-    height: 100%;
-  }
+}
 </style>
 {% endblock %}
 </head>
   <body>
   {% block body %}
-      <div class="sidebar">
-          <ul class="sidebar">
-              {% for place in places %}
-              <li class="place" id="place{{ place['venue']['id'] }}">
-                  <img id="place{{ place['venue']['id'] }}" class="marker-icon">
-                  <b><a href="{{ foursquare link }}">{{ place['venue']['name'] }}</a></b>
-                  <p>Category: {{ place['venue']['categories'][0]['name'] }}</p>
-                  <p>Rating {{ place['venue']['rating'] }} from {{ place['venue']['num_reviews'] }} reviews</p>
-              </li>
-              {% endfor %}
-      </div>
-    <div id="map"></div>
-    {% endblock %}
+  <div class="container-fluid">
+  <div class="row">
+
+    <div class="col-md-2 sidebar">
+        <ul class="sidebar">
+            {% for place in places %}
+            <li class="place" id="place{{ place['venue']['id'] }}">
+                <img id="image-place{{ place['venue']['id'] }}" class="marker-icon">
+                <b><a href="#">{{ place['venue']['name'] }}</a></b>
+                <p>Category: {{ place['venue']['categories'][0]['name'] }}</p>
+                <p>Rating {{ place['venue']['rating'] }} from {{ place['venue']['ratingSignals']}} reviews</p>
+            </li>
+            {% endfor %}
+       </ul>
+    </div>
+
+    <div class="col-md-10 col-md-offset-2 content" id="map">
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
 </body>

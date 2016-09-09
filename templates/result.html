@@ -20,7 +20,7 @@
   }
   #sidebar li.place {
       padding: 5px 10px;
-      
+
   }
 </style>
 {% endblock %}
@@ -30,9 +30,9 @@
   <div id="sidebar">
       <ul class="sidebar">
           {% for listing in listings %}
-          <li class="place" id="place{{ place['venue']['id'] }}">
-              <img id="place{{ place['venue']['id'] }}" class="marker-icon">
-              <b><a href="http://127.0.0.1:5000/foursquare/{{ listing['id'] }}">listing['title']</a></b>
+          <li class="place" id="bnb{{ listing['id'] }}">
+              <img id="bnb{{ listing['id'] }}" class="marker-icon">
+              <b><a href="http://127.0.0.1:5000/foursquare/{{ listing['id'] }}">{{ listing['title'] }}</a></b>
               <p>Price: {{ listing['price'] }} per night</p>
               <p>Type: {{ listing['type'] }}
               <p>Rating {{ listing['star_rating'] }} from {{ listing['reviews_count'] }} reviews</p>
