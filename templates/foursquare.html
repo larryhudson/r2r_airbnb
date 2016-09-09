@@ -73,6 +73,17 @@ async defer></script>
 </head>
   <body>
   {% block body %}
+      <div class="sidebar">
+          <ul class="sidebar">
+              {% for place in places %}
+              <li class="place" id="place{{ place['venue']['id'] }}">
+                  <img id="place{{ place['venue']['id'] }}" class="marker-icon">
+                  <b><a href="{{ foursquare link }}">{{ place['venue']['name'] }}</a></b>
+                  <p>Category: {{ place['venue']['categories'][0]['name'] }}</p>
+                  <p>Rating {{ place['venue']['rating'] }} from {{ place['venue']['num_reviews'] }} reviews</p>
+              </li>
+              {% endfor %}
+      </div>
     <div id="map"></div>
     {% endblock %}
 </body>

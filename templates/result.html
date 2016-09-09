@@ -12,15 +12,33 @@
   }
   #map {
     height: 100%;
+    width: 80%;
+  }
+  #sidebar {
+      height: 100%;
+      width: 20%;
+  }
+  #sidebar li.place {
+      padding: 5px 10px;
+      
   }
 </style>
 {% endblock %}
 </head>
   <body>
   {% block body %}
-  {% for listing in listings %}
-     <p>{{ listing['title'] }} - {{ listing['price'] }} per night - average rating {{ listing['star_rating']}} from {{ listing['reviews_count'] }} reviews</p>
-   {% endfor %}
+  <div id="sidebar">
+      <ul class="sidebar">
+          {% for listing in listings %}
+          <li class="place" id="place{{ place['venue']['id'] }}">
+              <img id="place{{ place['venue']['id'] }}" class="marker-icon">
+              <b><a href="http://127.0.0.1:5000/foursquare/{{ listing['id'] }}">listing['title']</a></b>
+              <p>Price: {{ listing['price'] }} per night</p>
+              <p>Type: {{ listing['type'] }}
+              <p>Rating {{ listing['star_rating'] }} from {{ listing['reviews_count'] }} reviews</p>
+          </li>
+          {% endfor %}
+  </div>
     <div id="map"></div>
     <script type="text/javascript"
   src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
