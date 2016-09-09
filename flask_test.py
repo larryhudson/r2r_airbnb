@@ -40,11 +40,23 @@ def foursquare(airbnb_id):
     airbnb_listing_response = SF.get_airbnb_listing_response(airbnb_id)
     airbnb_lat_lng = SF.get_airbnb_lat_lng(airbnb_listing_response)
     airbnb_lat, airbnb_lng = airbnb_lat_lng
+    maps_api_key = environ["MAPS_API_KEY"]
+    colours_dict = {'Food': 'blue',
+                    'Outdoors & Recreation': 'green',
+                    'Event': 'red',
+                    'Professional & Other Places': 'orange',
+                    'Residence': 'yellow',
+                    'Nightlife Spot': 'purple',
+                    'Arts & Entertainment': 'purple',
+                    'College & University': 'orange',
+                    'Shop & Service': 'red',
+                    'Travel & Transport': 'green',
+                    }
 
     response = FSQ.venue_explore_response(airbnb_lat_lng)
     places = FSQ.get_recommended_places(response)
 
-    return render_template('foursquare.html', airbnb_lat=airbnb_lat, airbnb_lng=airbnb_lng, places=places)
+    return render_template('foursquare.html', airbnb_lat=airbnb_lat, airbnb_lng=airbnb_lng, places=places, maps_api_key=maps_api_key, colours_dict=colours_dict)
 
 
 @app.route('/map')
