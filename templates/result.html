@@ -2,94 +2,124 @@
 <head>
 {% block head %}
 <title>Simple Map</title>
-<meta name="viewport" content="initial-scale=1.0">
 <meta charset="utf-8">
-<style>
-  html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-  }
-  #map {
-    height: 100%;
-    width: 80%;
-  }
-  #sidebar {
-      height: 100%;
-      width: 20%;
-  }
-  #sidebar li.place {
-      padding: 5px 10px;
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
+<link href="{{ url_for('static', filename='bootstrap.css') }}" rel="stylesheet">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ maps_api_key }}&callback=initMap"
+async defer></script>
+
+<script>
+  var map;
+  var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  var labelIndex = 0;
+
+  function initMap() {
+    map = new google.maps.Map(document.getElementById('map'), {
+      center: {lat: {{ first_lat }},
+               lng: {{ first_lng }} },
+      zoom: 12
+    });
+
+    var bounds = new google.maps.LatLngBounds();
+
+    {% for listing in listings %}
+    var lat = {{ listing['lat'] }};
+    var lng = {{ listing['lng'] }};
+    var location = new google.maps.LatLng(lat, lng);
+    var bnbTitle = "{{ listing['title'] }}";
+    var price = {{ listing['price'] }};
+    var star_rating = {{ listing['star_rating'] }};
+    var num_reviews = {{ listing['reviews_count'] }};
+    var markerColour = '{{ colours_dict[listing['room_type']] }}';
+    var iconURL = 'https://raw.githubusercontent.com/Concept211/Google-Maps-Markers/master/images/marker_' + markerColour + labels[labelIndex++ % labels.length] + '.png';
+
+    var contentString = '<b><a href="http://127.0.0.1:5000/foursquare/{{ listing['id']}}">' + bnbTitle + '</a></b>' +
+        '<p><b>$' + price + '</b> per night</p>' +
+        '<p>Average rating ' + star_rating + ' from ' + num_reviews + ' reviews</p>';
+
+    var infowindow{{ listing['id'] }} = new google.maps.InfoWindow({
+          content: contentString
+        });
+
+
+    var bnb{{ listing['id'] }} = new google.maps.Marker({
+      position: location,
+      map: map,
+      title: bnbTitle,
+      icon: iconURL
+    });
+
+    var sidebarIMG = document.getElementById("image-bnb{{ listing['id'] }}");
+
+    sidebarIMG.src = iconURL;
+
+    bounds.extend(bnb{{ listing['id'] }}.position);
+
+    bnb{{ listing['id'] }}.addListener('click', function() {
+      infowindow{{ listing['id'] }}.open(map, bnb{{ listing['id'] }});
+    });
+    {% endfor %}
+
+    map.fitBounds(bounds);
   }
+</script>
+
+<style>
+html, body, .container-fluid, .row {
+	height: 100%;
+}
+
+.sidebar {
+  background-color: #CCCCCC;
+  overflow-y: auto;
+}
+
+#map {
+    height: 100%;
+}
+
+@media (min-width: 992px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: block;
+    background-color: #CCCCCC;
+  }
+}
 </style>
 {% endblock %}
 </head>
   <body>
   {% block body %}
-  <div id="sidebar">
-      <ul class="sidebar">
-          {% for listing in listings %}
-          <li class="place" id="bnb{{ listing['id'] }}">
-              <img id="bnb{{ listing['id'] }}" class="marker-icon">
-              <b><a href="http://127.0.0.1:5000/foursquare/{{ listing['id'] }}">{{ listing['title'] }}</a></b>
-              <p>Price: {{ listing['price'] }} per night</p>
-              <p>Type: {{ listing['type'] }}
-              <p>Rating {{ listing['star_rating'] }} from {{ listing['reviews_count'] }} reviews</p>
-          </li>
-          {% endfor %}
+  <div class="container-fluid">
+  <div class="row">
+
+    <div class="col-md-3 sidebar">
+        <ul class="sidebar">
+            {% for listing in listings %}
+            <li class="place" id="bnb{{ listing['id'] }}">
+                <img id="image-bnb{{ listing['id'] }}" class="marker-icon">
+                <b><a href="http://127.0.0.1:5000/foursquare/{{ listing['id'] }}">{{ listing['title'] }}</a></b>
+                <p>Price: {{ listing['price'] }} per night</p>
+                <p>Type: {{ listing['room_type'] }}
+                <p>Rating {{ listing['star_rating'] }} from {{ listing['reviews_count'] }} reviews</p>
+            </li>
+            {% endfor %}
+       </ul>
+    </div>
+
+    <div class="col-md-9 col-md-offset-3 content" id="map">
+    </div>
+
   </div>
-    <div id="map"></div>
-    <script type="text/javascript"
-  src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-    <script>
-    {% block map %}
-      var map;
-      function initMap() {
-        map = new google.maps.Map(document.getElementById('map'), {
-          center: {lat: {{ first_lat }},
-                   lng: {{ first_lng }} },
-          zoom: 12
-        });
+</div>
 
-        var bounds = new google.maps.LatLngBounds();
-
-        {% for listing in listings %}
-        var lat = {{ listing['lat'] }};
-        var lng = {{ listing['lng'] }};
-        var location = new google.maps.LatLng(lat, lng);
-        var bnbTitle = "{{ listing['title'] }}";
-        var price = {{ listing['price'] }};
-        var star_rating = {{ listing['star_rating'] }};
-        var num_reviews = {{ listing['reviews_count'] }};
-
-        var contentString = '<b><a href="http://127.0.0.1:5000/foursquare/{{ listing['id']}}">' + bnbTitle + '</a></b>' +
-            '<p><b>$' + price + '</b> per night</p>' +
-            '<p>Average rating ' + star_rating + ' from ' + num_reviews + ' reviews</p>';
-
-        var infowindow{{ listing['id'] }} = new google.maps.InfoWindow({
-              content: contentString
-            });
-
-
-        var bnb{{ listing['id'] }} = new google.maps.Marker({
-          position: location,
-          map: map,
-          title: bnbTitle,
-        });
-
-        bounds.extend(bnb{{ listing['id'] }}.position);
-
-        bnb{{ listing['id'] }}.addListener('click', function() {
-          infowindow{{ listing['id'] }}.open(map, bnb{{ listing['id'] }});
-        });
-        {% endfor %}
-
-        map.fitBounds(bounds);
-      }
-    {% endblock %}
-    </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key={{ maps_api_key }}&callback=initMap"
-    async defer></script>
-    {% endblock %}
+{% endblock %}
 </body>

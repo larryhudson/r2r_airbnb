@@ -30,10 +30,14 @@ def results():
     airbnb_response = SF.get_airbnb_response(city, price_range)
     listings = SF.get_top_listings(airbnb_response)
 
+    colours_dict = {'Entire home/apt': 'red',
+                    'Private room': 'blue',
+                    'Shared room': 'yellow'
+    }               
     first_lat = listings[0]['lat']
     first_lng = listings[0]['lng']
 
-    return render_template('result.html', listings=listings, first_lat=first_lat, first_lng=first_lng, maps_api_key=maps_api_key)
+    return render_template('result.html', listings=listings, first_lat=first_lat, first_lng=first_lng, maps_api_key=maps_api_key, colours_dict=colours_dict)
 
 @app.route('/foursquare/<airbnb_id>')
 def foursquare(airbnb_id):

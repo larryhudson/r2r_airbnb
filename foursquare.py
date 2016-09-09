@@ -63,5 +63,10 @@ def get_recommended_places(response):
     for place in places_list:
         place_cat = place['venue']['categories'][0]['name']
         place['broad_cat'] = get_broad_category(categories_response, place_cat)
+        if 'tips' in place:
+            place_tip = place['tips'][0]['text']
+        else:
+            place_tip = "No tips found"
+        place['tip'] = place_tip
 
     return places_list

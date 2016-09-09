@@ -82,15 +82,17 @@ def get_top_listings(response):
     listings = []
     for item in listings_dict:
         if item['listing']['star_rating'] and item['listing']['reviews_count']:
-            listings.append({ 'id': item['listing']['id'], \
-                              'title': item['listing']['name'] , \
-                              'address': item['listing']['public_address'], \
-                              'star_rating': item['listing']['star_rating'], \
-                              'reviews_count': item['listing']['reviews_count'], \
-                              'sort_average': item['listing']['star_rating'] + (item['listing']['reviews_count'] / 10), \
-                              'price': item['pricing_quote']['rate']['amount'],
-                              'lat': item['listing']['lat'],
-                              'lng': item['listing']['lng'], })
+            if item['listing']['reviews_count'] > 5:
+                listings.append({ 'id': item['listing']['id'], \
+                                  'title': item['listing']['name'] , \
+                                  'address': item['listing']['public_address'], \
+                                  'star_rating': item['listing']['star_rating'], \
+                                  'reviews_count': item['listing']['reviews_count'], \
+                                  'sort_average': item['listing']['star_rating'] + (item['listing']['reviews_count'] / 10), \
+                                  'price': item['pricing_quote']['rate']['amount'],
+                                  'lat': item['listing']['lat'],
+                                  'lng': item['listing']['lng'],
+                                  'room_type': item['listing']['room_type'] })
 
     sorted_listings = sorted(listings, key=lambda k: k['sort_average'], reverse=True)
     return sorted_listings

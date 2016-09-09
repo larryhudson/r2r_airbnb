@@ -19,6 +19,8 @@ async defer></script>
       var map;
       var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
       var labelIndex = 0;
+      var gmarkers = [];
+      var prevInfoWindow = false;
 
       function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
@@ -39,7 +41,7 @@ async defer></script>
         var iconURL = 'https://raw.githubusercontent.com/Concept211/Google-Maps-Markers/master/images/marker_' + markerColour + labels[labelIndex++ % labels.length] + '.png';
 
         var contentString = '<b>' + placeTitle + '</b>' +
-            '<p>Average rating ' + rating + ' from ' + num_reviews + ' reviews</p>';
+            '<p><i>"{{ place['tip'] }}"</i></p>';
 
         var infowindow{{ place['venue']['id'] }} = new google.maps.InfoWindow({
               content: contentString
@@ -54,6 +56,12 @@ async defer></script>
           icon: iconURL
         });
         place{{ place['venue']['id'] }}.addListener('click', function() {
+            if( prevInfoWindow ) {
+           prevInfoWindow.close();
+        }
+
+        prevInfoWindow = infowindow{{ place['venue']['id'] }};
+
           infowindow{{ place['venue']['id'] }}.open(map, place{{ place['venue']['id'] }});
         });
         var sidebarIMG = document.getElementById("image-place{{ place['venue']['id'] }}");
@@ -61,10 +69,21 @@ async defer></script>
         sidebarIMG.src = iconURL;
         bounds.extend(place{{ place['venue']['id'] }}.position);
 
+        gmarkers.push(place{{ place['venue']['id'] }});
+
         {% endfor %}
 
         map.fitBounds(bounds);
       }
+      {% for place in places %}
+
+      {% endfor %}
+
+      google.maps.event.addDomListener(window, 'load', initialize);
+
+      function myClick(markerclick){
+            google.maps.event.trigger(markerclick, 'click');
+        }
 {% endblock %}
 </script>
 <style>
@@ -100,12 +119,12 @@ html, body, .container-fluid, .row {
   <div class="container-fluid">
   <div class="row">
 
-    <div class="col-md-2 sidebar">
+    <div class="col-md-3 sidebar">
         <ul class="sidebar">
             {% for place in places %}
             <li class="place" id="place{{ place['venue']['id'] }}">
                 <img id="image-place{{ place['venue']['id'] }}" class="marker-icon">
-                <b><a href="#">{{ place['venue']['name'] }}</a></b>
+                <b><a href="javascript:google.maps.event.trigger(gmarkers[{{ places.index(place) }}],'click');">{{ place['venue']['name'] }}</a></b>
                 <p>Category: {{ place['venue']['categories'][0]['name'] }}</p>
                 <p>Rating {{ place['venue']['rating'] }} from {{ place['venue']['ratingSignals']}} reviews</p>
             </li>
@@ -113,7 +132,7 @@ html, body, .container-fluid, .row {
        </ul>
     </div>
 
-    <div class="col-md-10 col-md-offset-2 content" id="map">
+    <div class="col-md-9 col-md-offset-3 content" id="map">
     </div>
 
   </div>
